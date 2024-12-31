@@ -1,12 +1,8 @@
 import React from "react";
 import FormCard from "../../components/FormCard";
-const backgroundImageStyle = {
-  backgroundImage: "url(/path/to/your/image.jpg)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-};
+
 export const Home = () => {
-  // <div style={backgroundImageStyle}></div>;
+  
   return (
     <>
       <div

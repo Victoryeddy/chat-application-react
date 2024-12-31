@@ -1,22 +1,23 @@
 import React, { useState } from "react";
-import SendIcon from "../components/SendIcon.jsx"
+import SendIcon from "../components/Icons/SendIcon.jsx";
 import { useFormData } from "../context/FormContext.jsx";
 import { useNavigate } from "react-router-dom";
-const FormCard = ({
-  title = "Enter Details",
-  buttonText = "Submit",
-}) => {
+import { collection, setDoc, doc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
+const FormCard = ({ title = "Enter Details", buttonText = "Submit" }) => {
   const navigate = useNavigate();
-  const {setFormData} = useFormData();
-  const [input1, setInput1] = useState("");
-  const [input2, setInput2] = useState("");
+  const { setFormData } = useFormData();
+  const [channel, setInput1] = useState("");
+  const [username, setInput2] = useState("");
 
-  const handleSubmit = () => {
-    setFormData({ input1, input2 });
+  const handleSubmit = async () => {
+    setFormData({ channel, username });
+    const docRef = doc(db, "messages", channel);
+    await setDoc(docRef, {});
     setInput1("");
     setInput2("");
-    navigate('/chat');
+    navigate("/chat");
   };
 
   return (
@@ -41,7 +42,7 @@ const FormCard = ({
               <input
                 id="input1"
                 type="text"
-                value={input1}
+                value={channel}
                 onChange={(e) => setInput1(e.target.value)}
                 className="w-full px-3 py-2 border  border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="e.g boys and girls chat"
@@ -59,7 +60,7 @@ const FormCard = ({
               <input
                 id="input2"
                 type="text"
-                value={input2}
+                value={username}
                 onChange={(e) => setInput2(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your username or fullname"
@@ -70,14 +71,13 @@ const FormCard = ({
 
           {/* Submit Button */}
           <p className="mt-12">
-
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors mt-12 mb-2 flex items-center justify-center font-semibold"
-            disabled={input1 == "" || input2 == ""}
-          >
-            {buttonText} <SendIcon className="ms-2"/>
-          </button>
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors mt-12 mb-2 flex items-center justify-center font-semibold"
+              disabled={channel == "" || username == ""}
+            >
+              {buttonText} <SendIcon className="ms-2" />
+            </button>
           </p>
         </div>
       </div>
