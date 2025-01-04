@@ -4,6 +4,8 @@ import {
   query,
   orderBy,
   onSnapshot,
+  doc,
+  getDoc,
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
@@ -11,34 +13,55 @@ import IconoirSendDiagonalSolid from "./Icons/SendIcon";
 
 import { useFormData } from "../context/FormContext";
 
-const ChatComponent = ({ db}) => {
+const ChatComponent = ({ db, messages}) => {
   const { formData } = useFormData();
-  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  // const [messages, setMessages] = useState([]);
+  
 
-  useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("timestamp"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setMessages(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
-    });
-    return unsubscribe;
-  }, [db]);
+ 
+  async function getUsername(uid, channel) {
+    const docRef = doc(db, "messages", channel, "local_guests", "guests");
+
+    try {
+      const docSnapshot = await getDoc(docRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        const username = data[uid]; 
+        if (username) {
+         
+          return username;
+        } else {
+          console.log("No username found for the given UID.");
+          return null;
+        }
+      } else {
+        console.log("Document does not exist.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return null;
+    }
+  }
+
+
 
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-
-    await addDoc(collection(db, "messages"), {
-      text: newMessage,
-      sender: formData?.input2,
-      timestamp: serverTimestamp(),
-    });
-    setNewMessage("");
+   
+    try{
+      let sender = await getUsername(formData.userCredential?.user?.uid, formData.channel);
+      await addDoc(collection(db, "messages", formData.channel, "conversation"), {
+        text: newMessage,
+        sender: sender,
+        timestamp: serverTimestamp(),
+      });
+      setNewMessage("");
+    } catch(error){
+      console.error("Error sending message:", error);
+    }
   };
 
   return (
@@ -48,7 +71,7 @@ const ChatComponent = ({ db}) => {
           <div
             key={index}
             className={`flex flex-col justify-end ${
-              message.sender
+              message.sender == formData?.username
                 ? "justify-end items-end"
                 : "justify-start"
             }`}
@@ -56,7 +79,7 @@ const ChatComponent = ({ db}) => {
             <div className="flex">
               <div
                 className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 ${
-                  message.sender === formData?.input2
+                  message.sender === formData?.username
                     ? "bg-blue-500 text-white rounded-br-none"
                     : "bg-white text-gray-800 rounded-bl-none"
                 }`}

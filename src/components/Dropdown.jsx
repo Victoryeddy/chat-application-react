@@ -24,7 +24,7 @@ export const Dropdown = ({ options, className }) => {
 
       {isOpen && (
         <div
-          className={`absolute  w-[8vw] mt-1 bg-white rounded-md shadow-lg right-1`}
+          className={`absolute  w-[20vw] lg:w-[8vw] mt-1 bg-white rounded-md shadow-lg right-1`}
         >
           <ul className="py-1">
             {options.map((option) => (

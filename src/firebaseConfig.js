@@ -2,8 +2,8 @@
 import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
 import { getFunctions, /*connectFunctionsEmulator */} from "firebase/functions";
-import { getFirestore } from "firebase/firestore";
-import { getAuth /*signInWithEmailAndPassword */} from "firebase/auth";
+import { getFirestore, getDocs, collection, onSnapshot, query,  orderBy, where } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword, signInAnonymously, signOut } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -23,4 +23,4 @@ const auth = getAuth(firebaseApp);
 const functions = getFunctions(firebaseApp);
 
 
-export { firebaseApp, db, auth, functions };
+export { firebaseApp, db, auth, signOut, functions, signInAnonymously, getDocs, collection, onSnapshot, query, orderBy, where };

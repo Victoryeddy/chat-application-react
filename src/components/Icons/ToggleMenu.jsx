@@ -11,7 +11,7 @@ export default function StreamlineInterfaceSettingMenu2ButtonParallelHorizontalL
     >
       <path
         fill="none"
-        stroke="currentColor"
+        stroke="#131313"
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M13.5 2H6m5 5H3.5m5 5h-8"

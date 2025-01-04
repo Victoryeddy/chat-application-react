@@ -1,23 +1,54 @@
 import React, { useState } from "react";
 import SendIcon from "../components/Icons/SendIcon.jsx";
+import Spinner from "../assets/spinner.gif"
 import { useFormData } from "../context/FormContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { collection, setDoc, doc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { collection, setDoc, doc, updateDoc } from "firebase/firestore";
+import { db, signInAnonymously, auth } from "../firebaseConfig";
 
 const FormCard = ({ title = "Enter Details", buttonText = "Submit" }) => {
   const navigate = useNavigate();
   const { setFormData } = useFormData();
   const [channel, setInput1] = useState("");
   const [username, setInput2] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function saveUsername(uid, username) {
+    const docRef = doc(db, "messages", channel, "local_guests", "guests");
+     console.log(channel);
+    try {
+      await updateDoc(docRef, {
+        [uid]: username,
+      });
+    } catch (error) {
+      if (error) {
+        await setDoc(docRef, {
+          [uid]: username,
+        });
+      } else {
+        console.error("Error saving username:", error);
+      }
+    }
+  }
 
   const handleSubmit = async () => {
-    setFormData({ channel, username });
-    const docRef = doc(db, "messages", channel);
-    await setDoc(docRef, {});
-    setInput1("");
-    setInput2("");
-    navigate("/chat");
+    setLoading(prev => prev = true);
+    try {
+      const userCredential = await signInAnonymously(auth);
+      const docRef = doc(db, "messages", channel);
+      await setDoc(docRef, {});
+      saveUsername(userCredential?.user?.uid, username);
+      setFormData({ channel, userCredential, username });
+      
+      setInput1("");
+      setInput2("");
+      navigate("/chat");
+      setLoading(prev => prev = false);
+    } catch (error) {
+      console.log(error);
+      setLoading((prev) => (prev = false));
+
+    }
   };
 
   return (
@@ -45,7 +76,7 @@ const FormCard = ({ title = "Enter Details", buttonText = "Submit" }) => {
                 value={channel}
                 onChange={(e) => setInput1(e.target.value)}
                 className="w-full px-3 py-2 border  border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g boys and girls chat"
+                placeholder="e.g chat group name"
                 required
               />
             </div>
@@ -76,7 +107,7 @@ const FormCard = ({ title = "Enter Details", buttonText = "Submit" }) => {
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors mt-12 mb-2 flex items-center justify-center font-semibold"
               disabled={channel == "" || username == ""}
             >
-              {buttonText} <SendIcon className="ms-2" />
+              {buttonText} {!loading && (<SendIcon className="ms-2" />)} {loading && (<img src={Spinner} alt="" width="20" className="ms-2"/>)}
             </button>
           </p>
         </div>

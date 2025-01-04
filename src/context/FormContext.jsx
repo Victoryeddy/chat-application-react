@@ -8,7 +8,7 @@ export const useFormData = () => useContext(FormContext);
 export default function FormProvider({ children }) {
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem("formData");
-    return savedData ? JSON.parse(savedData) : { channel: "", user: "" };
+    return savedData ? JSON.parse(savedData) : { channel: "", user: "", currentUser: "" };
   });
 
   useEffect(() => {
